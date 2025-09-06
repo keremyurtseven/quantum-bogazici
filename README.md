@@ -1,7 +1,9 @@
 # Quantum Bogazici
-duzenek2_asama1.ipynb = Aşama 1 - Spektral Temizleme ve Frekans Seçme
+Devize1.ipynb - Düzenek 1 gerekli kodlar
 
-duzenek2_asama2346.ipynb = Aşama 2-3-4-6 - Modülatör, Kuantum Dalga, İletim Hattı, ADC Frekans Cevabı
+duzenek2_asama1.ipynb = Düzenek 2 Aşama 1 - Spektral Temizleme ve Frekans Seçme
+
+duzenek2_asama2346.ipynb = Düzenek 2 Aşama 2-3-4-6 - Modülatör, Kuantum Dalga, İletim Hattı, ADC Frekans Cevabı
 
 constants.py - Global Sabitler
 
