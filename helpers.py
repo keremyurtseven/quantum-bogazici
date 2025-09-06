@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 from scipy.signal import lfilter
+import scipy as sp
 from tqdm import tqdm
 from constants import *
 
@@ -301,13 +302,13 @@ def delta_sigma_cifb(
         Create a delta modulator using the reference in the task slide
     """
     # Normalize the input and shift between -1 to 1
-    u = np.asarray(u, dtype=float)
+    u = np.asarray(u, dtype=np.float64)
     x_min = np.min(u)
     x_max = np.max(u)
 
     # avoid division by zero
     if x_max == x_min:
-        u_normalized = np.zeros_like(u, dtype=float)
+        u_normalized = np.zeros_like(u, dtype=np.float64)
     else:
         u_normalized = 2.0 * (u - x_min) / (x_max - x_min) - 1.0
 
@@ -324,7 +325,7 @@ def delta_sigma_cifb(
     th1, th2 = -1.0/3.0, 1.0/3.0
 
     for n in range(N):
-        s1 += B1*u_normalized[n] - A1*y_fb_prev - G1*s1
+        s1 += B1*u_normalized[n] - A1*y_fb_prev - G1*s2
         s2 += B2*u_normalized[n] + C1*s1       - A2*y_fb_prev
         vq[n] = B3*u_normalized[n] + C2*s2     # quantizer input
 
@@ -432,3 +433,56 @@ def H(f, p):
     
 
     return (zy / z_series(zy, z4)) * (z1 / z_series(z1, z2))
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def multitone_fit(y, fs, freqs, fit_offset=True):
+    """
+    Fits y[n] ~ sum_k A_k*sin(2*pi*fk*t + phi_k) + D
+    via least squares.
+
+    Parameters
+    ----------
+    y : array
+        Time-domain signal
+    fs : float
+        Sampling frequency
+    freqs : list or array
+        Known tone frequencies
+    fit_offset : bool
+        Include constant DC offset
+
+    Returns
+    -------
+    results : dict
+        Dictionary with amplitude, phase, and offset
+    """
+    N = len(y)
+    t = np.arange(N)/fs
+
+    # Build design matrix
+    Xcols = []
+    for f0 in freqs:
+        Xcols.append(np.sin(2*np.pi*f0*t))
+        Xcols.append(np.cos(2*np.pi*f0*t))
+    if fit_offset:
+        Xcols.append(np.ones(N))
+    X = np.column_stack(Xcols)
+
+    # Solve least squares
+    coeff, _, _, _ = sp.linalg.lstsq(X, y)
+
+    results = {"freq":np.zeros_like(freqs), "amp": np.zeros_like(freqs), "phase": np.zeros_like(freqs), "offset": 0}
+    for k, f0 in tqdm(enumerate(freqs)):
+        a = coeff[2*k]
+        b = coeff[2*k + 1]
+        A = np.sqrt(a**2 + b**2)
+        phi = np.arctan2(b, a)
+        results["freq"][k] = f0
+        results["amp"][k] = A
+        results["phase"][k] = phi
+    if fit_offset:
+        results["offset"] = coeff[-1]
+
+    return results
