@@ -19,4 +19,4 @@ tones/tones_fs100.000MHz_sp100dB.txt - 150 uV/V RMSD değerine sahip frekans ve 
 
 tones/transmit_line_tones.txt - İletim hattının frekans cevabı
 
-tones/modulation.txt - 14GHz'de örneklenmiş kuantum dalganın modülasyon çıktıları
+tones/modulation.txt - 14GHz'de örneklenmiş kuantum dalganın modülasyon çıktıları.
